@@ -8,9 +8,12 @@
 
 #import <UIKit/UIKit.h>
 #import <CoreMotion/CoreMotion.h>
+#import "mouseletData.h"
 
 @interface MainViewController : UIViewController
 
+
+@property mouseletData* myData;
 
 //Mouse reset to center
 @property bool needToResetMouse;
@@ -70,13 +73,13 @@
 @property double zAccel;
 
 
-//Multiplier: default 2.47712 (300)
+//Multiplier: default 2.47712 (300), from (1) 10 to (4) 10000
 @property (weak, nonatomic) IBOutlet UISlider *MultiplierSlider;
 - (IBAction)multiplierChanged:(id)sender;
 @property (weak, nonatomic) IBOutlet UILabel *MultiplierText;
 @property double multiplier;
 
-//Friction: default 0 (1)
+//Friction: default 0 (1), from (-1) 0.1 to (2) 100
 @property (weak, nonatomic) IBOutlet UISlider *FrictionSlider;
 - (IBAction)frictionChanged:(id)sender;
 @property (weak, nonatomic) IBOutlet UILabel *FrictionText;
@@ -92,6 +95,9 @@
 @property double buttonVY;
 @property double buttonAX;
 @property double buttonAY;
+
+
+- (void) setData:(mouseletData*) newData;
 
 
 @end

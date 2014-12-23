@@ -22,6 +22,8 @@
     self.multiplier = 300;
     self.friction = 1;
     
+    self.myData = [[mouseletData alloc] init];
+    
     
     self.movingAveragePointCount = 3;
     
@@ -76,9 +78,13 @@
                 //self.xAccel = self.rawXUserAcceleration;
                 //self.yAccel = self.rawYUserAcceleration;
                 
-                //Platform-style
+                //Half-Remote/Platform-style
                 self.xAccel = self.rawYRotationRate * -1;
                 self.yAccel = self.rawXRotationRate * 1;
+                
+                //Gravity platform-style
+                //self.xAccel = self.rawXGravity * -1;
+                //self.yAccel = self.rawYGravity * -1;
                 
                 
                 self.t_i = self.t_f;
@@ -199,6 +205,11 @@
 }*/
 
 
+- (void) setData:(mouseletData*) newData {
+    
+    self.myData = newData;
+}
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
@@ -213,4 +224,20 @@
     self.friction = pow(10,self.FrictionSlider.value);
     self.FrictionText.text = [NSString stringWithFormat:@"%.2f",self.friction];
 }
+
+
+
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+    if ([segue.destinationViewController respondsToSelector:@selector(setData:)]) {
+        [segue.destinationViewController performSelector:@selector(setData:) withObject:self.myData];
+        
+    }
+}
+
+
 @end

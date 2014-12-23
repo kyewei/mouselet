@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		192078F21A4A1C5500865E2B /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 192078F11A4A1C5500865E2B /* SettingsViewController.m */; };
+		192078F51A4A269A00865E2B /* mouseletData.m in Sources */ = {isa = PBXBuildFile; fileRef = 192078F41A4A269A00865E2B /* mouseletData.m */; };
 		193358A51A4762D700B8225E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 193358A41A4762D700B8225E /* Main.storyboard */; };
 		19A0F13A1A453788005D354C /* Entitlements.plist in Resources */ = {isa = PBXBuildFile; fileRef = 19A0F1391A453788005D354C /* Entitlements.plist */; };
 		19D8943D1A45333100F74705 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 19D8943C1A45333100F74705 /* main.m */; };
@@ -28,6 +30,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		192078F01A4A1C5500865E2B /* SettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
+		192078F11A4A1C5500865E2B /* SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
+		192078F31A4A269A00865E2B /* mouseletData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mouseletData.h; sourceTree = "<group>"; };
+		192078F41A4A269A00865E2B /* mouseletData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = mouseletData.m; sourceTree = "<group>"; };
 		193358A41A4762D700B8225E /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		19A0F1391A453788005D354C /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
 		19D894371A45333100F74705 /* mouselet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mouselet.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -87,6 +93,10 @@
 				19D8943E1A45333100F74705 /* AppDelegate.h */,
 				19D8943F1A45333100F74705 /* AppDelegate.m */,
 				193358A41A4762D700B8225E /* Main.storyboard */,
+				192078F01A4A1C5500865E2B /* SettingsViewController.h */,
+				192078F11A4A1C5500865E2B /* SettingsViewController.m */,
+				192078F31A4A269A00865E2B /* mouseletData.h */,
+				192078F41A4A269A00865E2B /* mouseletData.m */,
 				19D894411A45333100F74705 /* MainViewController.h */,
 				19D894421A45333100F74705 /* MainViewController.m */,
 				19D894471A45333100F74705 /* Images.xcassets */,
@@ -224,8 +234,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				19D894431A45333100F74705 /* MainViewController.m in Sources */,
+				192078F51A4A269A00865E2B /* mouseletData.m in Sources */,
 				19D894401A45333100F74705 /* AppDelegate.m in Sources */,
 				19D8943D1A45333100F74705 /* main.m in Sources */,
+				192078F21A4A1C5500865E2B /* SettingsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -13,21 +13,36 @@
 #import <Foundation/Foundation.h>
 #import <CoreMotion/CoreMotion.h>
 #import <UIKit/UIKit.h>
+//#import "MainViewController.h"
+//#import "SettingsViewController.h"
+
+@class MainViewController;
+@class SettingsViewController;
+
 
 @interface mouseletData : NSObject <NSStreamDelegate>
+
+typedef enum  {
+    UNABLETOCONNECT=-1,
+    NOTCONNECTED=0,
+    CONNECTED=1,
+    QUERYINGCONNECTION=2
+}connectionStatus;
 
 @property NSInputStream *inputStream;
 @property NSOutputStream *outputStream;
 
+//Reference to controllers;
+@property MainViewController* mainViewController;
+@property SettingsViewController* settingsViewController;
 
 //Device Info
 @property NSString* deviceName;
 @property NSString* deviceIP;
-- (NSString*) deviceStatus;
 @property NSString* serverIP;
 
 //Ready or not?
-@property bool isConnectedToServer;
+@property connectionStatus currentStatus;
 
 //Raw data
 @property double rawXRotationRate;
@@ -85,6 +100,10 @@
 
 -(void)motionApiUpdate:(CMDeviceMotion *)motion;
 
+-(void)initNetworkCommunication;
 
+-(void)connect:(id)sender;
+
+-(void)disconnect:(id)sender;
 
 @end

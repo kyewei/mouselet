@@ -10,13 +10,21 @@
 #include <ifaddrs.h>
 #include <arpa/inet.h>
 
+//Forward Declarations
+@interface MainViewController : UIViewController
+@end
+@interface SettingsViewController : UITableViewController
+- (void)connectionStatusUpdate;
+@end
+
+
 @implementation mouseletData 
 
 - (id) init {
     self = [super init];
     if (self) {
         
-        self.isConnectedToServer = false;
+        self.currentStatus = NOTCONNECTED;
         
         self.multiplier = 300;
         self.friction = 1;
@@ -35,14 +43,11 @@
         [self reset];
         
         self.deviceName = [[UIDevice currentDevice] name];
-        self.deviceIP = [self deviceIP];
+        self.deviceIP = [self getIPAddress];
+        NSLog(@"%@",self.deviceIP);
         self.serverIP = @"192.168.222.100"; 
     }
     return self;
-}
-
--(NSString*) deviceStatus {
-    return (self.isConnectedToServer? @"Connected": @"Disconnected");
 }
 
 -(void) reset {
@@ -132,9 +137,11 @@
 
 
 - (void)initNetworkCommunication {
+    
+    CFStringRef server = CFBridgingRetain([NSString stringWithString:self.serverIP]);
     CFReadStreamRef readStream;
     CFWriteStreamRef writeStream;
-    CFStreamCreatePairWithSocketToHost(NULL, (CFStringRef)@"localhost", 22096, &readStream, &writeStream);
+    CFStreamCreatePairWithSocketToHost(NULL, (CFStringRef)server, 22096, &readStream, &writeStream);
     self.inputStream = (NSInputStream *)CFBridgingRelease(readStream);
     self.outputStream = (NSOutputStream *)CFBridgingRelease(writeStream);
     
@@ -146,12 +153,15 @@
     
     [self.inputStream open];
     [self.outputStream open];
+    self.currentStatus = QUERYINGCONNECTION;
+    [self.settingsViewController connectionStatusUpdate];
+    NSLog(@"Tried connecting to %@",server);
     
 }
 
-- (void)communicationStart:(id)sender {
+- (void)connect:(id)sender {
     
-    NSString *deviceName = @"";
+    NSString *deviceName = self.deviceName;
     
     NSString *response  = [NSString stringWithFormat:@"Connect:%@", deviceName];
     NSData *data = [[NSData alloc] initWithData:[response dataUsingEncoding:NSASCIIStringEncoding]];
@@ -161,7 +171,7 @@
 
 - (void)sendData:(id)sender {
     
-    NSString *message = @"";
+    NSString *message = @"hi";
     
     NSString *response  = [NSString stringWithFormat:@"msg:%@", message];
     NSData *data = [[NSData alloc] initWithData:[response dataUsingEncoding:NSASCIIStringEncoding]];
@@ -196,23 +206,41 @@
         
         case NSStreamEventOpenCompleted:
             NSLog(@"Stream opened");
-            self.isConnectedToServer = true;
+            self.currentStatus = CONNECTED;
+            [self.settingsViewController connectionStatusUpdate];
             break;
             
         case NSStreamEventErrorOccurred:
-            NSLog(@"Can not connect to the host!");
+            NSLog(@"Cannot connect to the host!");
+            self.currentStatus = UNABLETOCONNECT;
+            [self.settingsViewController connectionStatusUpdate];
             break;
             
         case NSStreamEventEndEncountered:
-            [theStream close];
-            [theStream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-            self.isConnectedToServer = false;
+            [self disconnect:nil];
+            [self.settingsViewController connectionStatusUpdate];
+            break;
+            
+        case NSStreamEventHasSpaceAvailable:
+            break;
+            
+        case NSStreamEventNone:
             break;
             
         default:
+            NSLog(@"%lu",streamEvent);
             NSLog(@"Unknown event");
     }
     
+}
+
+- (void) disconnect:(id)sender {
+    [self.inputStream close];
+    [self.inputStream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+    [self.outputStream close];
+    [self.outputStream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+    self.currentStatus = NOTCONNECTED;
+    [self.settingsViewController connectionStatusUpdate];
 }
 
 - (void) messageReceived:(NSString *)message {

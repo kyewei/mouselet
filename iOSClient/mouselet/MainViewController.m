@@ -20,6 +20,7 @@
     // Do any additional setup after loading the view, typically from a nib.
     
     self.myData = [[mouseletData alloc] init];
+    self.myData.mainViewController = self;
     
     self.needToResetMouse = true;
     self.motionManager = [[CMMotionManager alloc] init];

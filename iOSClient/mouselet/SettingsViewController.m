@@ -16,13 +16,15 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    NSLog(@"loaded!");
+    NSLog(@"Settings loaded!");
     
-    self.settingsOptions = [NSArray arrayWithObjects:@"Client Name",@"Client IP", @"Server IP", @"Connection Status", nil];
-    self.settingsOptionsDefaults = [NSArray arrayWithObjects:@"*", @"*", @"*", @"Disconnected", nil];
+    self.myData.settingsViewController = self;
     
-    self.settingsButtons = [NSArray arrayWithObjects: @"Connect", @"Disconnect", nil];
-    
+    self.clientName.text = self.myData.deviceName;
+    self.clientIP.text = self.myData.deviceIP;
+    self.serverIP.text = self.myData.serverIP;
+    [self.serverIP setDelegate:self];
+    [self connectionStatusUpdate];
     
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
@@ -38,13 +40,13 @@
 
 #pragma mark - Table view data source
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+/*- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
 #warning Potentially incomplete method implementation.
     // Return the number of sections.
     return 2;
-}
+}*/
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+/*- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 #warning Incomplete method implementation.
     // Return the number of rows in the section.
     //return 0;
@@ -52,10 +54,10 @@
         return self.settingsOptions.count;
     else //if (section ==1) {
         return self.settingsButtons.count;
-}
+}*/
 
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+/*- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     NSString *reuseCellIdentifier = (indexPath.section ==0? @"userChangeCell": @"actionCell");
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseCellIdentifier forIndexPath:indexPath];
@@ -74,13 +76,12 @@
         cell.detailTextLabel.text = @"hmm";
     }
     return cell;
-}
+}*/
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
     
     //[tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-    
 }
 
 /*
@@ -133,5 +134,71 @@
     }
 }
 
+
+- (IBAction)serverIPChange:(id)sender{
+    [self.myData disconnect:nil];
+    self.myData.serverIP = self.serverIP.text;
+    self.myData.currentStatus = NOTCONNECTED;
+    NSLog(@"Updated: %@",self.serverIP.text);
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    if( [[textField text] isEqualToString:self.serverIP.text] ) {
+        [self serverIPChange:nil];
+    }
+    NSLog(@"Resign");
+    [textField resignFirstResponder];
+    return NO;
+}
+
+
+- (IBAction)sendButtonRequest:(id)sender {
+    connectionStatus status = self.myData.currentStatus;
+    switch (status){
+        case CONNECTED:
+            [self.myData disconnect:nil];
+            break;
+        case NOTCONNECTED:
+            [self.myData initNetworkCommunication];
+            break;
+        case UNABLETOCONNECT:
+            break;
+        case QUERYINGCONNECTION:
+            [self.myData disconnect:nil];
+        default:
+            break;
+    }
+}
+
+- (void) connectionStatusUpdate {
+    connectionStatus status = self.myData.currentStatus;
+    switch (status) {
+        case CONNECTED:
+            self.connectionStatus.text = @"Connected";
+            self.requestButton.enabled = YES;
+            [self.requestButton setTitle:@"Disconnect!" forState:UIControlStateNormal];
+            break;
+        case NOTCONNECTED:
+            self.connectionStatus.text = @"Disconnected";
+            self.requestButton.enabled = YES;
+            [self.requestButton setTitle:@"Connect!" forState:UIControlStateNormal];
+            break;
+        case UNABLETOCONNECT:
+            self.connectionStatus.text = @"Error";
+            self.requestButton.enabled = NO;
+            [self.requestButton setTitle:@"Connect!" forState:UIControlStateNormal];
+            break;
+        case QUERYINGCONNECTION:
+            self.connectionStatus.text = @"Connecting...";
+            self.requestButton.enabled = YES;
+            [self.requestButton setTitle:@"Cancel" forState:UIControlStateNormal];
+            break;
+        default:
+            break;
+    }
+    
+    
+}
 
 @end

@@ -12,6 +12,7 @@
 @interface SettingsViewController : UITableViewController
 
 @property NSArray *settingsOptions;
+@property NSArray *settingsOptionsDefaults;
 @property NSArray *settingsButtons;
 @property mouseletData* myData;
 

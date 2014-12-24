@@ -19,6 +19,7 @@
     NSLog(@"loaded!");
     
     self.settingsOptions = [NSArray arrayWithObjects:@"Client Name",@"Client IP", @"Server IP", @"Connection Status", nil];
+    self.settingsOptionsDefaults = [NSArray arrayWithObjects:@"*", @"*", @"*", @"Disconnected", nil];
     
     self.settingsButtons = [NSArray arrayWithObjects: @"Connect", @"Disconnect", nil];
     
@@ -67,7 +68,7 @@
     
     if (indexPath.section ==0) {
         cell.textLabel.text = [self.settingsOptions objectAtIndex:indexPath.row];
-        cell.detailTextLabel.text = @"HI";
+        cell.detailTextLabel.text = [self.settingsOptionsDefaults objectAtIndex:indexPath.row];
     } else {//if (indexPath.section ==1)
         cell.textLabel.text = [self.settingsButtons objectAtIndex:indexPath.row];
         cell.detailTextLabel.text = @"hmm";
@@ -75,6 +76,12 @@
     return cell;
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    
+    //[tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+    
+}
 
 /*
 // Override to support conditional editing of the table view.

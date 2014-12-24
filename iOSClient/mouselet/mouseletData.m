@@ -25,6 +25,9 @@
     if (self) {
         
         self.currentStatus = NOTCONNECTED;
+        self.inputStreamOpen = false;
+        self.outputStreamOpen = false;
+        self.serverVerificationSent = false;
         
         self.multiplier = 300;
         self.friction = 1;
@@ -122,6 +125,13 @@
     
     self.deltaSX = self.multiplier*(self.buttonVX*self.dt);
     self.deltaSY = -self.multiplier*(self.buttonVY*self.dt);
+    
+    
+    if (self.currentStatus == VERIFIEDCONNECTION){
+        NSString* dataToSend = [NSString stringWithFormat:@"%@:%.6f:%.6f:%.2f:%.2f:%.5f",self.deviceName,self.deltaSX, self.deltaSY, self.t_i, self.t_f, self.dt];
+        //NSLog(sendData);
+        [self sendData:dataToSend];
+    }
 }
 
 - (NSNumber *) averageOfAllIn:(NSMutableArray *) array {
@@ -136,14 +146,14 @@
 }
 
 
-- (void)initNetworkCommunication {
+- (void)connect:(id)sender {
     
-    CFStringRef server = CFBridgingRetain([NSString stringWithString:self.serverIP]);
+    CFStringRef server = (__bridge CFStringRef)([NSString stringWithString:self.serverIP]);
     CFReadStreamRef readStream;
     CFWriteStreamRef writeStream;
     CFStreamCreatePairWithSocketToHost(NULL, (CFStringRef)server, 22096, &readStream, &writeStream);
-    self.inputStream = (NSInputStream *)CFBridgingRelease(readStream);
-    self.outputStream = (NSOutputStream *)CFBridgingRelease(writeStream);
+    self.inputStream = (__bridge_transfer NSInputStream *)readStream;
+    self.outputStream = (__bridge_transfer NSOutputStream *)writeStream;
     
     [self.inputStream setDelegate:self];
     [self.outputStream setDelegate:self];
@@ -159,24 +169,23 @@
     
 }
 
-- (void)connect:(id)sender {
+- (void)verifyServer:(id)sender{
     
-    NSString *deviceName = self.deviceName;
-    
-    NSString *response  = [NSString stringWithFormat:@"Connect:%@", deviceName];
+    NSString *response  = [NSString stringWithFormat:@"verify:%@\n", self.deviceName];
     NSData *data = [[NSData alloc] initWithData:[response dataUsingEncoding:NSASCIIStringEncoding]];
     [self.outputStream write:[data bytes] maxLength:[data length]];
-    
-};
+    NSLog(@"Verification query sent");
+}
 
-- (void)sendData:(id)sender {
+- (void)sendData:(NSString *)message {
     
-    NSString *message = @"hi";
-    
-    NSString *response  = [NSString stringWithFormat:@"msg:%@", message];
+    NSString *response  = [NSString stringWithFormat:@"data:%@\n", message];
     NSData *data = [[NSData alloc] initWithData:[response dataUsingEncoding:NSASCIIStringEncoding]];
     [self.outputStream write:[data bytes] maxLength:[data length]];
 }
+
+
+
 
 - (void)stream:(NSStream *)theStream handleEvent:(NSStreamEvent)streamEvent {
     
@@ -205,9 +214,20 @@
             break;
         
         case NSStreamEventOpenCompleted:
-            NSLog(@"Stream opened");
-            self.currentStatus = CONNECTED;
-            [self.settingsViewController connectionStatusUpdate];
+            
+            if(theStream == self.inputStream) {
+                self.inputStreamOpen = true;
+                NSLog(@"inputStream opened");
+            } else if (theStream == self.outputStream) {
+                self.outputStreamOpen = true;
+                NSLog(@"outputStream opened");
+            }
+            
+            if (self.inputStreamOpen && self.outputStreamOpen){
+                NSLog(@"Both streams open");
+                self.currentStatus = UNVERIFIEDCONNECTION;
+                [self.settingsViewController connectionStatusUpdate];
+            }
             break;
             
         case NSStreamEventErrorOccurred:
@@ -222,13 +242,19 @@
             break;
             
         case NSStreamEventHasSpaceAvailable:
+            if(theStream == self.outputStream){
+                if (self.currentStatus == UNVERIFIEDCONNECTION && !self.serverVerificationSent){
+                    [self verifyServer:nil];
+                    self.serverVerificationSent = true;
+                }
+            }
             break;
             
         case NSStreamEventNone:
             break;
             
         default:
-            NSLog(@"%lu",streamEvent);
+            NSLog(@"%lu",(unsigned long)streamEvent);
             NSLog(@"Unknown event");
     }
     
@@ -240,11 +266,18 @@
     [self.outputStream close];
     [self.outputStream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
     self.currentStatus = NOTCONNECTED;
+    self.inputStreamOpen = false;
+    self.outputStreamOpen = false;
+    self.serverVerificationSent = false;
     [self.settingsViewController connectionStatusUpdate];
 }
 
 - (void) messageReceived:(NSString *)message {
-    
+    if([[message componentsSeparatedByString:@":"][0] isEqualToString:@"sendstart"]){
+        self.currentStatus = VERIFIEDCONNECTION;
+        [self.settingsViewController connectionStatusUpdate];
+    }
+        
 }
 
 // Gotta give credits:

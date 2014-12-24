@@ -156,11 +156,14 @@
 - (IBAction)sendButtonRequest:(id)sender {
     connectionStatus status = self.myData.currentStatus;
     switch (status){
-        case CONNECTED:
+        case UNVERIFIEDCONNECTION:
+            [self.myData disconnect:nil];
+            break;
+        case VERIFIEDCONNECTION:
             [self.myData disconnect:nil];
             break;
         case NOTCONNECTED:
-            [self.myData initNetworkCommunication];
+            [self.myData connect:nil];
             break;
         case UNABLETOCONNECT:
             break;
@@ -174,7 +177,12 @@
 - (void) connectionStatusUpdate {
     connectionStatus status = self.myData.currentStatus;
     switch (status) {
-        case CONNECTED:
+        case UNVERIFIEDCONNECTION:
+            self.connectionStatus.text = @"Verifying...";
+            self.requestButton.enabled = YES;
+            [self.requestButton setTitle:@"Disconnect!" forState:UIControlStateNormal];
+            break;
+        case VERIFIEDCONNECTION:
             self.connectionStatus.text = @"Connected";
             self.requestButton.enabled = YES;
             [self.requestButton setTitle:@"Disconnect!" forState:UIControlStateNormal];

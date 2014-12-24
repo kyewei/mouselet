@@ -25,21 +25,26 @@
 typedef enum  {
     UNABLETOCONNECT=-1,
     NOTCONNECTED=0,
-    CONNECTED=1,
-    QUERYINGCONNECTION=2
+    VERIFIEDCONNECTION=1,
+    UNVERIFIEDCONNECTION=2,
+    QUERYINGCONNECTION=3
 }connectionStatus;
 
-@property NSInputStream *inputStream;
-@property NSOutputStream *outputStream;
+@property (retain) NSInputStream *inputStream;
+@property (retain) NSOutputStream *outputStream;
+
+@property bool serverVerificationSent;
+@property bool inputStreamOpen;
+@property bool outputStreamOpen;
 
 //Reference to controllers;
-@property MainViewController* mainViewController;
-@property SettingsViewController* settingsViewController;
+@property (strong) MainViewController* mainViewController;
+@property (strong) SettingsViewController* settingsViewController;
 
 //Device Info
-@property NSString* deviceName;
-@property NSString* deviceIP;
-@property NSString* serverIP;
+@property (strong) NSString* deviceName;
+@property (strong) NSString* deviceIP;
+@property (strong) NSString* serverIP;
 
 //Ready or not?
 @property connectionStatus currentStatus;
@@ -100,9 +105,9 @@ typedef enum  {
 
 -(void)motionApiUpdate:(CMDeviceMotion *)motion;
 
--(void)initNetworkCommunication;
-
 -(void)connect:(id)sender;
+
+-(void)verifyServer:(id)sender;
 
 -(void)disconnect:(id)sender;
 

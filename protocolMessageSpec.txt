@@ -1,0 +1,10 @@
+Verification process:
+
+verify:$deviceName //sent by client to server tell server to be ready
+sendstart:$deviceName //sent by server to tell client server is ready
+
+---
+
+Data sending process:
+
+data:$deviceName:$dX:$dY:$t_i:$t_f:$dt // sent by client to server to update mouse position

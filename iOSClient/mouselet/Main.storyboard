@@ -266,7 +266,10 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="192.168.222.100" borderStyle="roundedRect" placeholder="IP Address" textAlignment="right" minimumFontSize="16" translatesAutoresizingMaskIntoConstraints="NO" id="TST-b0-lWf">
-                                                    <rect key="frame" x="428" y="9" width="164" height="30"/>
+                                                    <rect key="frame" x="437" y="7" width="155" height="30"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="155" id="h1N-pW-NKT"/>
+                                                    </constraints>
                                                     <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="18"/>
                                                     <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="numbersAndPunctuation" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
                                                     <connections>
@@ -284,10 +287,10 @@
                                                 </label>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstItem="TST-b0-lWf" firstAttribute="top" secondItem="RC9-ny-v29" secondAttribute="topMargin" constant="1" id="4Ud-js-GuD"/>
+                                                <constraint firstItem="TST-b0-lWf" firstAttribute="top" secondItem="RC9-ny-v29" secondAttribute="topMargin" constant="-1" id="4Ud-js-GuD"/>
                                                 <constraint firstItem="TST-b0-lWf" firstAttribute="trailing" secondItem="RC9-ny-v29" secondAttribute="trailingMargin" id="dvH-Ly-xcI"/>
                                                 <constraint firstItem="hpi-cS-hUJ" firstAttribute="leading" secondItem="RC9-ny-v29" secondAttribute="leadingMargin" constant="7" id="loh-zi-a0m"/>
-                                                <constraint firstAttribute="bottomMargin" secondItem="TST-b0-lWf" secondAttribute="bottom" constant="-3" id="r0p-pc-P9L"/>
+                                                <constraint firstAttribute="bottomMargin" secondItem="TST-b0-lWf" secondAttribute="bottom" constant="-1" id="r0p-pc-P9L"/>
                                                 <constraint firstItem="hpi-cS-hUJ" firstAttribute="top" secondItem="RC9-ny-v29" secondAttribute="topMargin" constant="4" id="uJJ-My-9Go"/>
                                             </constraints>
                                         </tableViewCellContentView>
@@ -313,7 +316,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bQF-pE-vQx">
-                                                    <rect key="frame" x="456" y="7" width="128" height="30"/>
+                                                    <rect key="frame" x="456" y="6" width="128" height="30"/>
                                                     <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="17"/>
                                                     <state key="normal" title="Connect!"/>
                                                     <connections>
@@ -327,9 +330,9 @@
                                                 <constraint firstItem="5vg-VM-sB7" firstAttribute="top" secondItem="QZp-Vt-kwF" secondAttribute="topMargin" constant="4" id="IPZ-yj-h2o"/>
                                                 <constraint firstAttribute="centerX" secondItem="nFZ-NG-NM4" secondAttribute="centerX" id="MUX-Cq-qo4"/>
                                                 <constraint firstItem="5vg-VM-sB7" firstAttribute="leading" secondItem="QZp-Vt-kwF" secondAttribute="leadingMargin" constant="7" id="Q4z-0R-XlE"/>
-                                                <constraint firstItem="bQF-pE-vQx" firstAttribute="top" secondItem="QZp-Vt-kwF" secondAttribute="topMargin" constant="-1" id="k4X-R0-liS"/>
+                                                <constraint firstItem="bQF-pE-vQx" firstAttribute="top" secondItem="QZp-Vt-kwF" secondAttribute="topMargin" constant="-2" id="k4X-R0-liS"/>
                                                 <constraint firstItem="bQF-pE-vQx" firstAttribute="trailing" secondItem="QZp-Vt-kwF" secondAttribute="trailingMargin" constant="-8" id="k9W-sq-RVM"/>
-                                                <constraint firstAttribute="bottomMargin" secondItem="bQF-pE-vQx" secondAttribute="bottom" constant="-2" id="mPW-db-aiA"/>
+                                                <constraint firstAttribute="bottomMargin" secondItem="bQF-pE-vQx" secondAttribute="bottom" constant="-1" id="mPW-db-aiA"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                     </tableViewCell>
@@ -351,7 +354,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0TR-9a-3wy" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1739" y="-16"/>
+            <point key="canvasLocation" x="1739" y="-17"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="K9v-WI-YTc">

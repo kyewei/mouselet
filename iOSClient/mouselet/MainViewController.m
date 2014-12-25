@@ -24,7 +24,7 @@
     
     self.needToResetMouse = true;
     self.motionManager = [[CMMotionManager alloc] init];
-    self.motionManager.deviceMotionUpdateInterval = 0.01;
+    self.motionManager.deviceMotionUpdateInterval = 0.02;
     
     if ([self.motionManager isDeviceMotionAvailable])
     {

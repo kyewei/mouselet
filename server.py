@@ -1,12 +1,13 @@
 #!/usr/bin/env python2.7
 
-#Import Twisted Network Library
-from twisted.internet.protocol import Factory, Protocol
-from twisted.internet import reactor
+#Import python socket library and threading
+import socket
+import select
 
 
 #Distinguish between OS
 #if OS X, currentPlatform = "darwin"
+#if Windows, currentPlatform = "win32"
 import sys
 currentPlatform = sys.platform
 
@@ -55,31 +56,8 @@ def screenSize():
     return (mainMonitor.size.width, mainMonitor.size.height)
 
 
-
-
-
-
 #Connected Devices
 devices = {};
-
-
-
-class mouseletProtocol(Protocol):
-    def connectionMade(self):
-        self.factory.clients.append(self)
-        print "A client ("+str(hex(id(self)))+") connected, total",len(self.factory.clients),"client(s):", map(lambda x:hex(id(x)),self.factory.clients)
-
-    def connectionLost(self, reason):
-        self.factory.clients.remove(self)
-        print "Client",hex(id(self)),"removed, total",len(self.factory.clients),"client(s):", map(lambda x:hex(id(x)),self.factory.clients)
-
-    def dataReceived(self, data):
-        print "Data received from "+str(hex(id(self)))+":",data
-        processMessage(data, self.sendData)
-
-    def sendData(self, message):
-        print "Server sent messsage:",message
-        self.transport.write(message+"\n")
 
 
 def processMessage(message, fn):
@@ -123,17 +101,53 @@ def processMessage(message, fn):
                 else:
                     mouseup(devices[splitmsg[1]]["x"],devices[splitmsg[1]]["y"])
 
+def wrapfn(sendfn):
+    def displaysent(message):
+        print "Server sent messsage:",message
+        sendfn(message+"\n")
+    return displaysent
 
 def main():
-    factory = Factory()
-    factory.clients = []
-    factory.protocol = mouseletProtocol
-    reactor.listenTCP(22096, factory)
+    global socket #apparently imported things don't show up
+    HOST = '' #all interfaces
+    PORT = 22096
+    CONNECTION_LIST = []
+    RECV_BUFFER = 1024
 
-    print "mouselet communication server started"
-    reactor.run()
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_socket.bind((HOST, PORT))
+    server_socket.listen(5)
+    CONNECTION_LIST.append(server_socket)
+    print "mouselet communication server ("+str(hex(id(server_socket)))+") started on port:", PORT
+    print "Total",len(CONNECTION_LIST),"connections(s)", map(lambda x:hex(id(x)),CONNECTION_LIST)
 
+    while True:
+        read_sockets, write_sockets, error_sockets = select.select(CONNECTION_LIST, [], [])
 
+        for socket in read_sockets:
+            if socket == server_socket:
+                client_socket, address = server_socket.accept()
+                CONNECTION_LIST.append(client_socket)
+                print "A client ("+str(hex(id(client_socket)))+") connected, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST)
+
+            else:
+                try:
+                    data = socket.recv(RECV_BUFFER)
+                    if data:
+                        print "Data received from "+str(hex(id(socket)))+":",data
+                        processMessage(data,wrapfn(socket.sendall))
+                    else:
+                        socket.close()
+                        CONNECTION_LIST.remove(socket)
+                        print "Client",hex(id(socket)),"removed, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST)
+                except:
+                    socket.close()
+                    CONNECTION_LIST.remove(socket)
+                    print "Client",hex(id(socket)),"removed, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST)
+                    continue
+
+    server_socket.close()
 
 if __name__ == '__main__':
     main()

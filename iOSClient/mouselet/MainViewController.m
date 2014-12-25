@@ -89,6 +89,17 @@
     self.myData = newData;
 }
 
+- (IBAction)LMBTouchDown:(id)sender {
+    NSLog(@"LMB down");
+    self.myData.LMBHeld = true;
+    [self.myData updateServerLMBStatus];
+}
+
+- (IBAction)LMBTouchUp:(id)sender {
+    NSLog(@"LMB up");
+    self.myData.LMBHeld = false;
+    [self.myData updateServerLMBStatus];
+}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

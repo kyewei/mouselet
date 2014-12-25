@@ -56,6 +56,9 @@
 
 - (void) setData:(mouseletData*) newData;
 
+- (IBAction)LMBTouchDown:(id)sender;
+
+- (IBAction)LMBTouchUp:(id)sender;
 
 @end
 

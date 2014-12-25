@@ -26,6 +26,7 @@
         
         self.currentStatus = NOTCONNECTED;
         self.currentStyle = ROLLINGPLAYFORM;
+        self.LMBHeld = false;
         self.inputStreamOpen = false;
         self.outputStreamOpen = false;
         self.serverVerificationSent = false;
@@ -160,6 +161,13 @@
     
 }
 
+- (void) updateServerLMBStatus {
+    if (self.currentStatus == VERIFIEDCONNECTION){
+        NSString *response  = [NSString stringWithFormat:@"statusLMB:%@:%d\n", self.deviceName, self.LMBHeld];
+        NSData *data = [[NSData alloc] initWithData:[response dataUsingEncoding:NSASCIIStringEncoding]];
+        [self.outputStream write:[data bytes] maxLength:[data length]];
+    }
+}
 
 - (void)connect:(id)sender {
     

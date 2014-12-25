@@ -18,7 +18,7 @@ from Quartz.CoreGraphics import CGEventCreateMouseEvent
 from Quartz.CoreGraphics import CGEventPost
 from Quartz.CoreGraphics import kCGEventMouseMoved
 from Quartz.CoreGraphics import kCGEventLeftMouseDown
-from Quartz.CoreGraphics import kCGEventLeftMouseDown
+from Quartz.CoreGraphics import kCGEventLeftMouseDragged
 from Quartz.CoreGraphics import kCGEventLeftMouseUp
 from Quartz.CoreGraphics import kCGMouseButtonLeft
 from Quartz.CoreGraphics import kCGHIDEventTap
@@ -27,22 +27,28 @@ from Quartz import CGDisplayBounds
 from Quartz import CGMainDisplayID
 
 def mouseEvent(type, posx, posy):
-        theEvent = CGEventCreateMouseEvent(
-                    None,
-                    type,
-                    (posx,posy),
-                    kCGMouseButtonLeft)
-        CGEventPost(kCGHIDEventTap, theEvent)
+    theEvent = CGEventCreateMouseEvent(
+                None,
+                type,
+                (posx,posy),
+                kCGMouseButtonLeft)
+    CGEventPost(kCGHIDEventTap, theEvent)
 
-def mousemove(posx,posy):
-        mouseEvent(kCGEventMouseMoved, posx,posy);
+def mousemove(posx,posy,isHeld):
+    mouseEvent(kCGEventMouseMoved, posx,posy)
+    if isHeld:
+        mouseEvent(kCGEventLeftMouseDragged, posx,posy)
 
 def mouseclick(posx,posy):
-        # uncomment this line if you want to force the mouse
-        # to MOVE to the click location first (I found it was not necessary).
-        #mouseEvent(kCGEventMouseMoved, posx,posy);
-        mouseEvent(kCGEventLeftMouseDown, posx,posy);
-        mouseEvent(kCGEventLeftMouseUp, posx,posy);
+    #mouseEvent(kCGEventMouseMoved, posx,posy)
+    mouseEvent(kCGEventLeftMouseDown, posx,posy)
+    mouseEvent(kCGEventLeftMouseUp, posx,posy)
+
+def mousedown(posx,posy):
+    mouseEvent(kCGEventLeftMouseDown, posx,posy)
+
+def mouseup(posx,posy):
+    mouseEvent(kCGEventLeftMouseUp, posx,posy)
 
 def screenSize():
     mainMonitor = CGDisplayBounds(CGMainDisplayID())
@@ -85,6 +91,7 @@ def processMessage(message, fn):
         devices[splitmsg[1]]["y"] = screenS[1]/2
         devices[splitmsg[1]]["xM"] = screenS[0]
         devices[splitmsg[1]]["yM"] = screenS[1]
+        devices[splitmsg[1]]["LMBHeld"] = False
         fn("sendstart:"+splitmsg[1])
     elif splitmsg[0] == "data":
         devices[splitmsg[1]]["x"] = devices[splitmsg[1]]["x"] + float(splitmsg[2])
@@ -97,14 +104,25 @@ def processMessage(message, fn):
         if (newY >= devices[splitmsg[1]]["yM"]) or newY <0:
             fn("resetY:"+splitmsg[1])
             newY = max(min(newY,devices[splitmsg[1]]["yM"]-1),0)
-        mousemove(newX, newY)
+        mousemove(newX, newY,devices[splitmsg[1]]["LMBHeld"])
     elif splitmsg[0] == "reset":
         if devices[splitmsg[1]]:
             devices[splitmsg[1]]["x"] = devices[splitmsg[1]]["xM"]/2
             devices[splitmsg[1]]["y"] = devices[splitmsg[1]]["yM"]/2
             newX = devices[splitmsg[1]]["x"]
             newY = devices[splitmsg[1]]["y"]
-            mousemove(newX, newY)
+            mousemove(newX, newY,devices[splitmsg[1]]["LMBHeld"])
+    elif splitmsg[0] == "statusLMB":
+        if devices[splitmsg[1]]:
+            wasHeld = devices[splitmsg[1]]["LMBHeld"]
+            isHeld = splitmsg[2] == "1"
+            if (wasHeld != isHeld):
+                devices[splitmsg[1]]["LMBHeld"] = isHeld
+                if isHeld:
+                    mousedown(devices[splitmsg[1]]["x"],devices[splitmsg[1]]["y"])
+                else:
+                    mouseup(devices[splitmsg[1]]["x"],devices[splitmsg[1]]["y"])
+
 
 def main():
     factory = Factory()

@@ -36,7 +36,6 @@
 @property (nonatomic, strong) IBOutlet UILabel *timeChange;
 @property (nonatomic, strong) IBOutlet UILabel *xAxisAccel;
 @property (nonatomic, strong) IBOutlet UILabel *yAxisAccel;
-@property (nonatomic, strong) IBOutlet UILabel *zAxisAccel;
 
 //Emulated mouse-ball
 @property (nonatomic, strong) IBOutlet UILabel *buttonO;

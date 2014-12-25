@@ -24,7 +24,7 @@
     
     self.needToResetMouse = true;
     self.motionManager = [[CMMotionManager alloc] init];
-    self.motionManager.deviceMotionUpdateInterval = 0.001;
+    self.motionManager.deviceMotionUpdateInterval = 0.01;
     
     if ([self.motionManager isDeviceMotionAvailable])
     {
@@ -67,9 +67,7 @@
                 self.timeChange.text = [NSString stringWithFormat:@"%.10f",self.myData.dt];
                 self.xAxisAccel.text = [NSString stringWithFormat:@"%.10f",self.myData.buttonAX];
                 self.yAxisAccel.text = [NSString stringWithFormat:@"%.10f",self.myData.buttonAY];
-                
-                //self.zAxisAccel.text = [NSString stringWithFormat:@"%.10f",self.buttonAZ];
-                
+                                
             });
         }];
     } else

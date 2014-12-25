@@ -29,4 +29,12 @@
 
 - (void) connectionStatusUpdate;
 
+
+@property (weak, nonatomic) IBOutlet UITableViewCell *platformStyleCell;
+@property (weak, nonatomic) IBOutlet UITableViewCell *sidewaysPlatformStyleCell;
+@property (weak, nonatomic) IBOutlet UITableViewCell *remoteControlStyleCell;
+@property (weak, nonatomic) IBOutlet UITableViewCell *gravityStyleCell;
+@property (weak, nonatomic) IBOutlet UITableViewCell *traditionalStyleCell;
+
+
 @end

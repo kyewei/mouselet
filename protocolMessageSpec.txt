@@ -7,4 +7,8 @@ sendstart:$deviceName //sent by server to tell client server is ready
 
 Data sending process:
 
-data:$deviceName:$dX:$dY:$t_i:$t_f:$dt // sent by client to server to update mouse position
+data:$deviceName:$dX:$dY:$dt // sent by client to server to update mouse position
+
+reset:$deviceName // sent by client to server to reset mouse position to center
+resetX:$deviceName //sent by server to client to reset X velocity (when mouse hits borders)
+resetY:$deviceName //sent by server to client to reset Y velocity (when mouse hits borders)

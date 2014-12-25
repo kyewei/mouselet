@@ -30,6 +30,14 @@ typedef enum  {
     QUERYINGCONNECTION=3
 }connectionStatus;
 
+typedef enum {
+    ROLLINGPLAYFORM,
+    SIDEWAYSPLAYFORM,
+    REMOTECONTROL,
+    GRAVITYPLATFORM,
+    TRADITIONALMOUSE
+}mouseControlStyle;
+
 @property (retain) NSInputStream *inputStream;
 @property (retain) NSOutputStream *outputStream;
 
@@ -48,6 +56,9 @@ typedef enum  {
 
 //Ready or not?
 @property connectionStatus currentStatus;
+
+//Mouse control style
+@property mouseControlStyle currentStyle;
 
 //Raw data
 @property double rawXRotationRate;

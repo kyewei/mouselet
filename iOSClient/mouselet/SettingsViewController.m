@@ -26,6 +26,32 @@
     [self.serverIP setDelegate:self];
     [self connectionStatusUpdate];
     
+    [self.platformStyleCell setAccessoryType:UITableViewCellAccessoryNone];
+    [self.sidewaysPlatformStyleCell setAccessoryType:UITableViewCellAccessoryNone];
+    [self.remoteControlStyleCell setAccessoryType:UITableViewCellAccessoryNone];
+    [self.gravityStyleCell setAccessoryType:UITableViewCellAccessoryNone];
+    [self.traditionalStyleCell setAccessoryType:UITableViewCellAccessoryNone];
+    switch (self.myData.currentStyle) {
+        case ROLLINGPLAYFORM:
+            [self.platformStyleCell setAccessoryType:UITableViewCellAccessoryCheckmark];
+            break;
+        case SIDEWAYSPLAYFORM:
+            [self.sidewaysPlatformStyleCell setAccessoryType:UITableViewCellAccessoryCheckmark];
+            break;
+        case REMOTECONTROL:
+            [self.remoteControlStyleCell setAccessoryType:UITableViewCellAccessoryCheckmark];
+            break;
+        case GRAVITYPLATFORM:
+            [self.gravityStyleCell setAccessoryType:UITableViewCellAccessoryCheckmark];
+            break;
+        case TRADITIONALMOUSE:
+            [self.traditionalStyleCell setAccessoryType:UITableViewCellAccessoryCheckmark];
+            break;
+        default:
+            break;
+    }
+    
+    
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
     
@@ -81,6 +107,43 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
     
+    UITableViewCell* cellClicked = [tableView cellForRowAtIndexPath:indexPath];
+    
+    if (cellClicked == self.platformStyleCell){
+        self.myData.currentStyle = ROLLINGPLAYFORM;
+    } else if (cellClicked == self.sidewaysPlatformStyleCell){
+        self.myData.currentStyle = SIDEWAYSPLAYFORM;
+    } else if (cellClicked == self.remoteControlStyleCell){
+        self.myData.currentStyle = REMOTECONTROL;
+    } else if (cellClicked == self.gravityStyleCell){
+        self.myData.currentStyle = GRAVITYPLATFORM;
+    } else if (cellClicked == self.traditionalStyleCell) {
+        self.myData.currentStyle = TRADITIONALMOUSE;
+    }
+    [self.platformStyleCell setAccessoryType:UITableViewCellAccessoryNone];
+    [self.sidewaysPlatformStyleCell setAccessoryType:UITableViewCellAccessoryNone];
+    [self.remoteControlStyleCell setAccessoryType:UITableViewCellAccessoryNone];
+    [self.gravityStyleCell setAccessoryType:UITableViewCellAccessoryNone];
+    [self.traditionalStyleCell setAccessoryType:UITableViewCellAccessoryNone];
+    switch (self.myData.currentStyle) {
+        case ROLLINGPLAYFORM:
+            [self.platformStyleCell setAccessoryType:UITableViewCellAccessoryCheckmark];
+            break;
+        case SIDEWAYSPLAYFORM:
+            [self.sidewaysPlatformStyleCell setAccessoryType:UITableViewCellAccessoryCheckmark];
+            break;
+        case REMOTECONTROL:
+            [self.remoteControlStyleCell setAccessoryType:UITableViewCellAccessoryCheckmark];
+            break;
+        case GRAVITYPLATFORM:
+            [self.gravityStyleCell setAccessoryType:UITableViewCellAccessoryCheckmark];
+            break;
+        case TRADITIONALMOUSE:
+            [self.traditionalStyleCell setAccessoryType:UITableViewCellAccessoryCheckmark];
+            break;
+        default:
+            break;
+    }
     //[tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
 }
 

@@ -79,17 +79,32 @@ class mouseletProtocol(Protocol):
 def processMessage(message, fn):
     splitmsg = message.strip().split(":");
     if splitmsg[0] == "verify":
+        screenS = screenSize()
         devices[splitmsg[1]] = {}
-        devices[splitmsg[1]]["x"] = screenSize()[0]/2
-        devices[splitmsg[1]]["y"] = screenSize()[1]/2
+        devices[splitmsg[1]]["x"] = screenS[0]/2
+        devices[splitmsg[1]]["y"] = screenS[1]/2
+        devices[splitmsg[1]]["xM"] = screenS[0]
+        devices[splitmsg[1]]["yM"] = screenS[1]
         fn("sendstart:"+splitmsg[1])
     elif splitmsg[0] == "data":
         devices[splitmsg[1]]["x"] = devices[splitmsg[1]]["x"] + float(splitmsg[2])
         newX = devices[splitmsg[1]]["x"]
         devices[splitmsg[1]]["y"] = devices[splitmsg[1]]["y"] + float(splitmsg[3])
         newY = devices[splitmsg[1]]["y"]
+        if (newX >= devices[splitmsg[1]]["xM"]) or newX <0:
+            fn("resetX:"+splitmsg[1])
+            newX = max(min(newX,devices[splitmsg[1]]["xM"]-1),0)
+        if (newY >= devices[splitmsg[1]]["yM"]) or newY <0:
+            fn("resetY:"+splitmsg[1])
+            newY = max(min(newY,devices[splitmsg[1]]["yM"]-1),0)
         mousemove(newX, newY)
-
+    elif splitmsg[0] == "reset":
+        if devices[splitmsg[1]]:
+            devices[splitmsg[1]]["x"] = devices[splitmsg[1]]["xM"]/2
+            devices[splitmsg[1]]["y"] = devices[splitmsg[1]]["yM"]/2
+            newX = devices[splitmsg[1]]["x"]
+            newY = devices[splitmsg[1]]["y"]
+            mousemove(newX, newY)
 
 def main():
     factory = Factory()

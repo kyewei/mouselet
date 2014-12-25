@@ -25,6 +25,7 @@
     if (self) {
         
         self.currentStatus = NOTCONNECTED;
+        self.currentStyle = ROLLINGPLAYFORM;
         self.inputStreamOpen = false;
         self.outputStreamOpen = false;
         self.serverVerificationSent = false;
@@ -61,6 +62,11 @@
     self.buttonAX = 0;
     self.buttonAY = 0;
     
+    if (self.currentStatus == VERIFIEDCONNECTION){
+        NSString *response  = [NSString stringWithFormat:@"reset:%@\n", self.deviceName];
+        NSData *data = [[NSData alloc] initWithData:[response dataUsingEncoding:NSASCIIStringEncoding]];
+        [self.outputStream write:[data bytes] maxLength:[data length]];
+    }
     //Rest of values are assigned per API update anyways, so it doesn't matter;
 }
 
@@ -79,22 +85,30 @@
     self.rawPitch = motion.attitude.pitch;
     self.rawYaw = motion.attitude.yaw;
     
-    
-    //Remote Control-like
-    //self.xAccel = self.rawZRotationRate * 1;
-    //self.yAccel = self.rawXRotationRate * -1;
-    
-    //Linear Distance-not Accurate
-    //self.xAccel = self.rawXUserAcceleration;
-    //self.yAccel = self.rawYUserAcceleration;
-    
-    //Half-Remote/Platform-style
-    self.xAccel = self.rawYRotationRate * -1;
-    self.yAccel = self.rawXRotationRate * 1;
-    
-    //Gravity platform-style
-    //self.xAccel = self.rawXGravity * -1;
-    //self.yAccel = self.rawYGravity * -1;
+    switch (self.currentStyle) {
+        case ROLLINGPLAYFORM: //Ball Rolling Platform-style
+            self.xAccel = self.rawYRotationRate * -1;
+            self.yAccel = self.rawXRotationRate * 1;
+            break;
+        case SIDEWAYSPLAYFORM: //Half-Remote/Platform-style
+            self.xAccel = self.rawYRotationRate * -1;
+            self.yAccel = self.rawXRotationRate * -1;
+            break;
+        case REMOTECONTROL: //Remote Control-like
+            self.xAccel = self.rawZRotationRate * 1;
+            self.yAccel = self.rawXRotationRate * -1;
+            break;
+        case GRAVITYPLATFORM: //Gravity platform-style
+            self.xAccel = self.rawXGravity * -1;
+            self.yAccel = self.rawYGravity * -1;
+            break;
+        case TRADITIONALMOUSE: //Linear Distance-not Accurate
+            self.xAccel = self.rawXUserAcceleration;
+            self.yAccel = self.rawYUserAcceleration;
+            break;
+        default:
+            break;
+    }
     
     
     self.t_i = self.t_f;
@@ -128,7 +142,8 @@
     
     
     if (self.currentStatus == VERIFIEDCONNECTION){
-        NSString* dataToSend = [NSString stringWithFormat:@"%@:%.6f:%.6f:%.2f:%.2f:%.5f",self.deviceName,self.deltaSX, self.deltaSY, self.t_i, self.t_f, self.dt];
+        //NSString* dataToSend = [NSString stringWithFormat:@"%@:%.6f:%.6f:%.2f:%.2f:%.5f",self.deviceName,self.deltaSX, self.deltaSY, self.t_i, self.t_f, self.dt];
+        NSString* dataToSend = [NSString stringWithFormat:@"%@:%.6f:%.6f:%.5f",self.deviceName,self.deltaSX, self.deltaSY,self.dt];
         //NSLog(sendData);
         [self sendData:dataToSend];
     }
@@ -273,9 +288,18 @@
 }
 
 - (void) messageReceived:(NSString *)message {
-    if([[message componentsSeparatedByString:@":"][0] isEqualToString:@"sendstart"]){
-        self.currentStatus = VERIFIEDCONNECTION;
-        [self.settingsViewController connectionStatusUpdate];
+    
+    NSArray* delimitedMessage =[[message stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] componentsSeparatedByString:@":"];
+    if ([delimitedMessage[1] isEqualToString:self.deviceName]){
+        if([delimitedMessage[0] isEqualToString:@"sendstart"]){
+            self.currentStatus = VERIFIEDCONNECTION;
+            [self.settingsViewController connectionStatusUpdate];
+        } else if([delimitedMessage[0] isEqualToString:@"resetX"]){
+            self.buttonVX = 0;
+        } else if([delimitedMessage[0] isEqualToString:@"resetY"]){
+            self.buttonVY = 0;
+        }
+        
     }
         
 }

@@ -8,6 +8,7 @@ import select
 #if OS X, currentPlatform = "darwin"
 #if Windows, currentPlatform = "win32"
 #if Cygwin, currentPlatform = "cygwin"
+#if Linux, currentPlatform = "linux2"
 import sys
 currentPlatform = sys.platform
 
@@ -42,8 +43,8 @@ if currentPlatform == "darwin":
 
     def mouseclick(posx,posy,device):
         #mouseEvent(kCGEventMouseMoved, posx,posy)
-        mouseEvent(kCGEventLeftMouseDown, posx,posy)
-        mouseEvent(kCGEventLeftMouseUp, posx,posy)
+        mousedown(posx,posy,device)
+        mouseup(posx,posy,device)
 
     def mousedown(posx,posy,device):
         mouseEvent(kCGEventLeftMouseDown, posx,posy)
@@ -102,6 +103,34 @@ elif currentPlatform == "win32":
         mousemove(posx,posy,True,device)
         mouse_event(MOUSEEVENTF_LEFTUP,0,0,0,0)
 
+#Linux only: use Xlibs
+elif currentPlatform == "linux2":
+    from Xlib.display import Display
+    from Xlib import X
+    from Xlib.ext.xtest import fake_input
+    
+    display = Display(':0')
+    
+    def screenSize():
+        return (display.screen().width_in_pixels,display.screen().height_in_pixels)
+    
+    def mousemove(posx,posy,isHeld,device):
+        fake_input(display, X.MotionNotify, x=posx, y=posy)
+        display.sync()
+    
+    def mousedown(posx,posy,device):
+        mousemove(posx,posy,False,device)
+        fake_input(display, X.ButtonPress, 1)
+        display.sync()
+    
+    def mouseup(posx,posy,device):
+        mousemove(posx,posy,False,device)
+        fake_input(display, X.ButtonRelease, 1)
+        display.sync()
+    
+    def mouseclick(posx,posy,device):
+        mousedown(posx,posy,device)
+        mouseup(posx,posy,device)
 
 #Connected Devices
 devices = {};
@@ -182,7 +211,7 @@ def main():
                 print "A client ("+str(hex(id(client_socket)))+") connected, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST)
 
             else:
-                #try:
+                try:
                     data = socket.recv(RECV_BUFFER)
                     if data:
                         print "Data received from "+str(hex(id(socket)))+":",data
@@ -191,12 +220,11 @@ def main():
                         socket.close()
                         CONNECTION_LIST.remove(socket)
                         print "Client",hex(id(socket)),"removed, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST)
-                #except:
-                    #socket.close()
-                    #CONNECTION_LIST.remove(socket)
-                    #print "Exception"
-                    #print "Client",hex(id(socket)),"removed, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST)
-                    #continue
+                except:
+                    socket.close()
+                    CONNECTION_LIST.remove(socket)
+                    print "Client",hex(id(socket)),"removed!, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST)
+                    continue
 
     server_socket.close()
 

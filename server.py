@@ -41,7 +41,7 @@ if currentPlatform == "darwin":
         if isHeld:
             mouseEvent(kCGEventLeftMouseDragged, posx,posy)
 
-    def mouseclick(posx,posy,device):
+    def mouseclick(posx,posy,device,count):
         #mouseEvent(kCGEventMouseMoved, posx,posy)
         mousedown(posx,posy,device)
         mouseup(posx,posy,device)
@@ -91,7 +91,7 @@ elif currentPlatform == "win32":
         mouse_event(MOUSEEVENTF_MOVEABS,getX(posx,device["xM"]),getY(posy,device["yM"]),0,0)
         #SetCursorPos(posx,posy)
 
-    def mouseclick(posx,posy,device):
+    def mouseclick(posx,posy,device,count):
         mousedown(posx,posy,device)
         mouseup(posx,posy,device)
 
@@ -108,27 +108,27 @@ elif currentPlatform == "linux2":
     from Xlib.display import Display
     from Xlib import X
     from Xlib.ext.xtest import fake_input
-    
+
     display = Display(':0')
-    
+
     def screenSize():
         return (display.screen().width_in_pixels,display.screen().height_in_pixels)
-    
+
     def mousemove(posx,posy,isHeld,device):
         fake_input(display, X.MotionNotify, x=posx, y=posy)
         display.sync()
-    
+
     def mousedown(posx,posy,device):
         mousemove(posx,posy,False,device)
         fake_input(display, X.ButtonPress, 1)
         display.sync()
-    
+
     def mouseup(posx,posy,device):
         mousemove(posx,posy,False,device)
         fake_input(display, X.ButtonRelease, 1)
         display.sync()
-    
-    def mouseclick(posx,posy,device):
+
+    def mouseclick(posx,posy,device,count):
         mousedown(posx,posy,device)
         mouseup(posx,posy,device)
 
@@ -149,6 +149,7 @@ def processMessage(message, fn):
             devices[splitmsg[1]]["xM"] = screenS[0]
             devices[splitmsg[1]]["yM"] = screenS[1]
             devices[splitmsg[1]]["LMBHeld"] = False
+            devices[splitmsg[1]]["RMBHeld"] = False
             fn("sendstart:"+splitmsg[1])
         elif splitmsg[0] == "data" and len(splitmsg) == 5:
             devices[splitmsg[1]]["x"] = devices[splitmsg[1]]["x"] + float(splitmsg[2])
@@ -157,10 +158,10 @@ def processMessage(message, fn):
             newY = devices[splitmsg[1]]["y"]
             if (newX >= devices[splitmsg[1]]["xM"]) or newX <0:
                 fn("resetX:"+splitmsg[1])
-                newX = max(min(newX,devices[splitmsg[1]]["xM"]-1),0)
+                newX = max(min(newX,devices[splitmsg[1]]["xM"]-1-1),0+1)
             if (newY >= devices[splitmsg[1]]["yM"]) or newY <0:
                 fn("resetY:"+splitmsg[1])
-                newY = max(min(newY,devices[splitmsg[1]]["yM"]-1),0)
+                newY = max(min(newY,devices[splitmsg[1]]["yM"]-1-1),0+1)
             mousemove(newX,newY,devices[splitmsg[1]]["LMBHeld"],devices[splitmsg[1]])
         elif splitmsg[0] == "reset" and len(splitmsg) == 2:
             if devices[splitmsg[1]]:

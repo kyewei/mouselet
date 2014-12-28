@@ -60,5 +60,13 @@
 
 - (IBAction)LMBTouchUp:(id)sender;
 
+- (IBAction)LMBDoubleClickUp:(id)sender;
+
+- (IBAction)RMBTouchDown:(id)sender;
+
+- (IBAction)RMBTouchUp:(id)sender;
+
+- (IBAction)lockMouse:(id)sender;
+
 @end
 

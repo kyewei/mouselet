@@ -24,14 +24,14 @@
     
     self.needToResetMouse = true;
     self.motionManager = [[CMMotionManager alloc] init];
-    self.motionManager.deviceMotionUpdateInterval = 0.02;
+    self.motionManager.deviceMotionUpdateInterval = 1.0/60;
     
     if ([self.motionManager isDeviceMotionAvailable])
     {
         NSOperationQueue *queue = [[NSOperationQueue alloc] init];
         [self.motionManager startDeviceMotionUpdatesToQueue:queue withHandler:^(CMDeviceMotion *motion, NSError *error) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                
+                                
                 if (self.needToResetMouse){
                     [self resetMouse:nil];
                     self.needToResetMouse = false;
@@ -99,6 +99,34 @@
     NSLog(@"LMB up");
     self.myData.LMBHeld = false;
     [self.myData updateServerLMBStatus];
+}
+
+- (IBAction)LMBDoubleClickUp:(id)sender {
+    NSLog(@"LMB doubleclick");
+    [self.myData LMBDoubleClick];
+}
+
+- (IBAction)RMBTouchDown:(id)sender {
+    NSLog(@"RMB down");
+    self.myData.RMBHeld = true;
+    [self.myData updateServerRMBStatus];
+}
+
+- (IBAction)RMBTouchUp:(id)sender {
+    NSLog(@"RMB up");
+    self.myData.RMBHeld = false;
+    [self.myData updateServerRMBStatus];
+}
+
+- (IBAction)lockMouse:(id)sender {
+    UIButton * button = (UIButton *)sender;
+    
+    NSLog(@"Mouse position locked/unlocked");
+    self.myData.mouseLocked = !self.myData.mouseLocked;
+    if (self.myData.mouseLocked)
+        [button setTitle:@"Unlock Mouse" forState:UIControlStateNormal];
+    else
+        [button setTitle:@"Lock Mouse" forState:UIControlStateNormal];
 }
 
 - (void)didReceiveMemoryWarning {

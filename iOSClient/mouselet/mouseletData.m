@@ -9,6 +9,8 @@
 #import "mouseletData.h"
 #include <ifaddrs.h>
 #include <arpa/inet.h>
+#import <netinet/tcp.h>
+#import <netinet/in.h>
 
 //Forward Declarations
 @interface MainViewController : UIViewController
@@ -27,6 +29,8 @@
         self.currentStatus = NOTCONNECTED;
         self.currentStyle = ROLLINGPLAYFORM;
         self.LMBHeld = false;
+        self.RMBHeld = false;
+        self.mouseLocked = false;
         self.inputStreamOpen = false;
         self.outputStreamOpen = false;
         self.serverVerificationSent = false;
@@ -73,6 +77,11 @@
 
 -(void)motionApiUpdate:(CMDeviceMotion *)motion {
     
+    self.t_i = self.t_f;
+    self.t_f = motion.timestamp; //motion.timestamp is time from boot, so first value is exceedingly high
+    self.dt = ((self.t_f-self.t_i) < 10? (self.t_f-self.t_i): 0);
+    
+    
     self.rawXRotationRate = motion.rotationRate.x;
     self.rawYRotationRate = motion.rotationRate.y;
     self.rawZRotationRate = motion.rotationRate.z;
@@ -86,67 +95,69 @@
     self.rawPitch = motion.attitude.pitch;
     self.rawYaw = motion.attitude.yaw;
     
-    switch (self.currentStyle) {
-        case ROLLINGPLAYFORM: //Ball Rolling Platform-style
-            self.xAccel = self.rawYRotationRate * -1;
-            self.yAccel = self.rawXRotationRate * 1;
-            break;
-        case SIDEWAYSPLAYFORM: //Half-Remote/Platform-style
-            self.xAccel = self.rawYRotationRate * -1;
-            self.yAccel = self.rawXRotationRate * -1;
-            break;
-        case REMOTECONTROL: //Remote Control-like
-            self.xAccel = self.rawZRotationRate * 1;
-            self.yAccel = self.rawXRotationRate * -1;
-            break;
-        case GRAVITYPLATFORM: //Gravity platform-style
-            self.xAccel = self.rawXGravity * -1;
-            self.yAccel = self.rawYGravity * -1;
-            break;
-        case TRADITIONALMOUSE: //Linear Distance-not Accurate
-            self.xAccel = self.rawXUserAcceleration;
-            self.yAccel = self.rawYUserAcceleration;
-            break;
-        default:
-            break;
-    }
-    
-    
-    self.t_i = self.t_f;
-    self.t_f = motion.timestamp; //motion.timestamp is time from boot, so first value is exceedingly high
-    self.dt = ((self.t_f-self.t_i) < 10? (self.t_f-self.t_i): 0);
-    
-    //Manage moving average
-    [self.movingAverageAccelX replaceObjectAtIndex:self.index withObject:[NSNumber numberWithDouble:self.xAccel]];
-    [self.movingAverageAccelY replaceObjectAtIndex:self.index withObject:[NSNumber numberWithDouble:self.yAccel]];
-    [self.movingAverageAccelZ replaceObjectAtIndex:self.index withObject:[NSNumber numberWithDouble:self.zAccel]];
-    self.index = (self.index+1)%self.movingAveragePointCount;
-    
-    //Get working accelerating values
-    double accelX = [self averageOfAllIn:self.movingAverageAccelX].doubleValue;
-    double accelY = [self averageOfAllIn:self.movingAverageAccelY].doubleValue;
-    //double accelZ = [self averageOfAllIn:self.movingAverageAccelZ].doubleValue;
-    
-    self.buttonAX = accelX * -10;
-    self.buttonAY = accelY * -10;
-    //Friction in use
-    self.buttonAX -= self.buttonVX * self.friction;
-    self.buttonAY -= self.buttonVY * self.friction;
-    
-    
-    self.buttonVX = self.buttonVX + self.buttonAX * self.dt;
-    self.buttonVY = self.buttonVY + self.buttonAY * self.dt;
-    
-    
-    self.deltaSX = self.multiplier*(self.buttonVX*self.dt);
-    self.deltaSY = -self.multiplier*(self.buttonVY*self.dt);
-    
-    
-    if (self.currentStatus == VERIFIEDCONNECTION){
-        //NSString* dataToSend = [NSString stringWithFormat:@"%@:%.6f:%.6f:%.2f:%.2f:%.5f",self.deviceName,self.deltaSX, self.deltaSY, self.t_i, self.t_f, self.dt];
-        NSString* dataToSend = [NSString stringWithFormat:@"%@:%.6f:%.6f:%.5f",self.deviceName,self.deltaSX, self.deltaSY,self.dt];
-        //NSLog(sendData);
-        [self sendData:dataToSend];
+    if (!self.mouseLocked){
+        switch (self.currentStyle) {
+            case ROLLINGPLAYFORM: //Ball Rolling Platform-style
+                self.xAccel = self.rawYRotationRate * -1;
+                self.yAccel = self.rawXRotationRate * 1;
+                break;
+            case SIDEWAYSPLAYFORM: //Half-Remote/Platform-style
+                self.xAccel = self.rawYRotationRate * -1;
+                self.yAccel = self.rawXRotationRate * -1;
+                break;
+            case REMOTECONTROL: //Remote Control-like
+                self.xAccel = self.rawZRotationRate * 1;
+                self.yAccel = self.rawXRotationRate * -1;
+                break;
+            case GRAVITYPLATFORM: //Gravity platform-style
+                self.xAccel = self.rawXGravity * -1;
+                self.yAccel = self.rawYGravity * -1;
+                break;
+            case TRADITIONALMOUSE: //Linear Distance-not Accurate
+                self.xAccel = self.rawXUserAcceleration;
+                self.yAccel = self.rawYUserAcceleration;
+                break;
+            default:
+                break;
+        }
+        
+        
+        //Manage moving average
+        [self.movingAverageAccelX replaceObjectAtIndex:self.index withObject:[NSNumber numberWithDouble:self.xAccel]];
+        [self.movingAverageAccelY replaceObjectAtIndex:self.index withObject:[NSNumber numberWithDouble:self.yAccel]];
+        [self.movingAverageAccelZ replaceObjectAtIndex:self.index withObject:[NSNumber numberWithDouble:self.zAccel]];
+        self.index = (self.index+1)%self.movingAveragePointCount;
+        
+        //Get working accelerating values
+        double accelX = [self averageOfAllIn:self.movingAverageAccelX].doubleValue;
+        double accelY = [self averageOfAllIn:self.movingAverageAccelY].doubleValue;
+        //double accelZ = [self averageOfAllIn:self.movingAverageAccelZ].doubleValue;
+        
+        self.buttonAX = accelX * -10;
+        self.buttonAY = accelY * -10;
+        //Friction in use
+        self.buttonAX -= self.buttonVX * self.friction;
+        self.buttonAY -= self.buttonVY * self.friction;
+        
+        
+        self.buttonVX = self.buttonVX + self.buttonAX * self.dt;
+        self.buttonVY = self.buttonVY + self.buttonAY * self.dt;
+        
+        
+        self.deltaSX = self.multiplier*(self.buttonVX*self.dt);
+        self.deltaSY = -self.multiplier*(self.buttonVY*self.dt);
+        
+        
+        if (self.currentStatus == VERIFIEDCONNECTION){
+            //NSString* dataToSend = [NSString stringWithFormat:@"%@:%.6f:%.6f:%.2f:%.2f:%.5f",self.deviceName,self.deltaSX, self.deltaSY, self.t_i, self.t_f, self.dt];
+            NSString* dataToSend = [NSString stringWithFormat:@"%@:%.6f:%.6f:%.5f",self.deviceName,self.deltaSX, self.deltaSY,self.dt];
+            //NSLog(sendData);
+            [self sendData:dataToSend];
+        }
+    } else {
+        self.deltaSX = 0;
+        self.deltaSY = 0;
+        
     }
 }
 
@@ -164,6 +175,22 @@
 - (void) updateServerLMBStatus {
     if (self.currentStatus == VERIFIEDCONNECTION){
         NSString *response  = [NSString stringWithFormat:@"statusLMB:%@:%d\n", self.deviceName, self.LMBHeld];
+        NSData *data = [[NSData alloc] initWithData:[response dataUsingEncoding:NSASCIIStringEncoding]];
+        [self.outputStream write:[data bytes] maxLength:[data length]];
+    }
+}
+
+- (void) updateServerRMBStatus {
+    if (self.currentStatus == VERIFIEDCONNECTION){
+        NSString *response  = [NSString stringWithFormat:@"statusRMB:%@:%d\n", self.deviceName, self.RMBHeld];
+        NSData *data = [[NSData alloc] initWithData:[response dataUsingEncoding:NSASCIIStringEncoding]];
+        [self.outputStream write:[data bytes] maxLength:[data length]];
+    }
+}
+
+- (void) LMBDoubleClick {
+    if (self.currentStatus == VERIFIEDCONNECTION){
+        NSString *response  = [NSString stringWithFormat:@"LMBDoubleClick:%@\n", self.deviceName];
         NSData *data = [[NSData alloc] initWithData:[response dataUsingEncoding:NSASCIIStringEncoding]];
         [self.outputStream write:[data bytes] maxLength:[data length]];
     }
@@ -193,6 +220,14 @@
 }
 
 - (void)verifyServer:(id)sender{
+    
+    
+    //Disable Nagle's algorithm for better latency
+    CFDataRef nativeSocket = CFWriteStreamCopyProperty((CFWriteStreamRef)self.outputStream, kCFStreamPropertySocketNativeHandle);
+    CFSocketNativeHandle *sock = (CFSocketNativeHandle *)CFDataGetBytePtr(nativeSocket);
+    setsockopt(*sock, IPPROTO_TCP, TCP_NODELAY, &(int){ 1 }, sizeof(int));
+    CFRelease(nativeSocket);
+    
     
     NSString *response  = [NSString stringWithFormat:@"verify:%@\n", self.deviceName];
     NSData *data = [[NSData alloc] initWithData:[response dataUsingEncoding:NSASCIIStringEncoding]];
@@ -250,6 +285,8 @@
                 NSLog(@"Both streams open");
                 self.currentStatus = UNVERIFIEDCONNECTION;
                 [self.settingsViewController connectionStatusUpdate];
+                
+                
             }
             break;
             

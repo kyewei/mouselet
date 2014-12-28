@@ -13,3 +13,5 @@ reset:$deviceName //sent by client to server to reset mouse position to center
 resetX:$deviceName //sent by server to client to reset X velocity (when mouse hits borders)
 resetY:$deviceName //sent by server to client to reset Y velocity (when mouse hits borders)
 statusLMB:$deviceName:$mousedown //sent by client to server to notify when LMB is pressed/released
+statusRMB:$deviceName:$mousedown //sent by client to server to notify when RMB is pressed/released
+LMBDoubleClick:$deviceName //sent by client to server to notify when LMB double click action is done

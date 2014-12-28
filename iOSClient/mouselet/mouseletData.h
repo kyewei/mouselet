@@ -59,8 +59,15 @@ typedef enum {
 
 //Mouse control style
 @property mouseControlStyle currentStyle;
+
+//Mouse clicks and whatnot
 @property bool LMBHeld;
 - (void) updateServerLMBStatus;
+@property bool RMBHeld;
+- (void) updateServerRMBStatus;
+- (void) LMBDoubleClick;
+- (void) RMBDoubleClick;
+@property bool mouseLocked;
 
 //Raw data
 @property double rawXRotationRate;

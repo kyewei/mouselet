@@ -121,12 +121,14 @@
 - (IBAction)lockMouse:(id)sender {
     UIButton * button = (UIButton *)sender;
     
-    NSLog(@"Mouse position locked/unlocked");
     self.myData.mouseLocked = !self.myData.mouseLocked;
-    if (self.myData.mouseLocked)
+    if (self.myData.mouseLocked) {
+        NSLog(@"Mouse position locked");
         [button setTitle:@"Unlock Mouse" forState:UIControlStateNormal];
-    else
+    } else {
+        NSLog(@"Mouse position unlocked");
         [button setTitle:@"Lock Mouse" forState:UIControlStateNormal];
+    }
 }
 
 - (void)didReceiveMemoryWarning {

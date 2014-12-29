@@ -66,7 +66,7 @@ typedef enum {
 @property bool RMBHeld;
 - (void) updateServerRMBStatus;
 - (void) LMBDoubleClick;
-- (void) RMBDoubleClick;
+//- (void) RMBDoubleClick;
 @property bool mouseLocked;
 
 //Raw data

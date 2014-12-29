@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6254" systemVersion="13F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="9FC-uL-AYa">
     <dependencies>
+        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
@@ -20,6 +21,17 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bqK-ws-UhP">
                                 <rect key="frame" x="16" y="72" width="568" height="508"/>
                                 <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="o4x-gG-QPa">
+                                        <rect key="frame" x="252" y="196" width="64" height="228"/>
+                                        <color key="backgroundColor" red="0.43529411759999997" green="0.4431372549" blue="0.47450980390000003" alpha="1" colorSpace="calibratedRGB"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="64" id="hPg-7R-BR9"/>
+                                        </constraints>
+                                        <state key="normal">
+                                            <color key="titleColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                    </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="QG0-ZA-rOa">
                                         <rect key="frame" x="324" y="124" width="236" height="64"/>
                                         <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
@@ -83,17 +95,6 @@
                                             <action selector="LMBTouchUp:" destination="20r-gZ-RH6" eventType="touchUpOutside" id="5bu-TP-5BE"/>
                                             <action selector="LMBTouchUp:" destination="20r-gZ-RH6" eventType="touchUpInside" id="VPv-LZ-Cut"/>
                                         </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="o4x-gG-QPa">
-                                        <rect key="frame" x="252" y="196" width="64" height="228"/>
-                                        <color key="backgroundColor" red="0.43529411759999997" green="0.4431372549" blue="0.47450980390000003" alpha="1" colorSpace="calibratedRGB"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="64" id="hPg-7R-BR9"/>
-                                        </constraints>
-                                        <state key="normal">
-                                            <color key="titleColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                        </state>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ACf-Xq-jwo">
                                         <rect key="frame" x="503" y="432" width="57" height="30"/>
@@ -215,6 +216,7 @@
                                     <constraint firstItem="HXt-cL-jXO" firstAttribute="leading" secondItem="K5k-EX-VWC" secondAttribute="trailing" constant="8" id="1cs-v9-agR"/>
                                     <constraint firstAttribute="trailing" secondItem="1XV-8c-34r" secondAttribute="trailing" constant="8" id="21L-GG-P6F"/>
                                     <constraint firstAttribute="centerX" secondItem="P8q-TA-vbj" secondAttribute="centerX" constant="60" id="3fz-0t-blK"/>
+                                    <constraint firstAttribute="centerX" secondItem="cr1-dA-hf6" secondAttribute="centerX" constant="-7" id="8QA-GI-WYA"/>
                                     <constraint firstItem="CAy-ru-QjN" firstAttribute="leading" secondItem="xOf-Vo-yWB" secondAttribute="trailing" constant="8" id="9Ph-Eb-HY7"/>
                                     <constraint firstItem="ACf-Xq-jwo" firstAttribute="top" secondItem="1XV-8c-34r" secondAttribute="bottom" constant="8" id="Bp6-NH-VPA"/>
                                     <constraint firstItem="hIC-eY-gr3" firstAttribute="top" secondItem="KGg-Ip-kfX" secondAttribute="bottom" constant="8" id="Bzh-N0-eLZ"/>

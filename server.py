@@ -17,11 +17,18 @@ currentPlatform = sys.platform
 if currentPlatform == "darwin":
     from Quartz.CoreGraphics import CGEventCreateMouseEvent
     from Quartz.CoreGraphics import CGEventPost
+    from Quartz.CoreGraphics import CGEventSetIntegerValueField
+    from Quartz.CoreGraphics import CGEventSetType
     from Quartz.CoreGraphics import kCGEventMouseMoved
     from Quartz.CoreGraphics import kCGEventLeftMouseDown
     from Quartz.CoreGraphics import kCGEventLeftMouseDragged
     from Quartz.CoreGraphics import kCGEventLeftMouseUp
+    from Quartz.CoreGraphics import kCGEventRightMouseDown
+    from Quartz.CoreGraphics import kCGEventRightMouseDragged
+    from Quartz.CoreGraphics import kCGEventRightMouseUp
+    from Quartz.CoreGraphics import kCGMouseEventClickState
     from Quartz.CoreGraphics import kCGMouseButtonLeft
+    from Quartz.CoreGraphics import kCGMouseButtonRight
     from Quartz.CoreGraphics import kCGHIDEventTap
 
     from Quartz import CGDisplayBounds
@@ -36,21 +43,42 @@ if currentPlatform == "darwin":
                     kCGMouseButtonLeft)
         CGEventPost(kCGHIDEventTap, theEvent)
 
-    def mousemove(posx,posy,isHeld,device):
-        mouseEvent(kCGEventMouseMoved, posx,posy)
-        if isHeld:
-            mouseEvent(kCGEventLeftMouseDragged, posx,posy)
+    def mousemove(posx,posy,isHeldL,isHeldR,device):
+        mouseEvent(kCGEventMouseMoved,posx,posy)
+        if isHeldL:
+            mouseEvent(kCGEventLeftMouseDragged,posx,posy)
+        if isHeldR:
+                mouseEvent(kCGEventRightMouseDragged,posx,posy)
 
     def mouseclick(posx,posy,device,count):
-        #mouseEvent(kCGEventMouseMoved, posx,posy)
-        mousedown(posx,posy,device)
-        mouseup(posx,posy,device)
+        theEvent = CGEventCreateMouseEvent(
+                    None,
+                    kCGEventLeftMouseDown,
+                    (posx,posy),
+                    kCGMouseButtonLeft)
 
-    def mousedown(posx,posy,device):
-        mouseEvent(kCGEventLeftMouseDown, posx,posy)
+        CGEventSetIntegerValueField(theEvent,kCGMouseEventClickState,count)
+        CGEventPost(kCGHIDEventTap, theEvent)
+        CGEventSetType(theEvent,kCGEventLeftMouseUp)
+        CGEventPost(kCGHIDEventTap, theEvent)
 
-    def mouseup(posx,posy,device):
-        mouseEvent(kCGEventLeftMouseUp, posx,posy)
+        for i in range(count-1):
+            CGEventSetType(theEvent,kCGEventLeftMouseDown)
+            CGEventPost(kCGHIDEventTap, theEvent)
+            CGEventSetType(theEvent,kCGEventLeftMouseUp)
+            CGEventPost(kCGHIDEventTap, theEvent)
+
+    def mousedown(posx,posy,device,isLeft):
+        if isLeft:
+            mouseEvent(kCGEventLeftMouseDown, posx,posy)
+        else:
+            mouseEvent(kCGEventRightMouseDown, posx,posy)
+
+    def mouseup(posx,posy,device,isLeft):
+        if isLeft:
+            mouseEvent(kCGEventLeftMouseUp, posx,posy)
+        else:
+            mouseEvent(kCGEventRightMouseUp, posx,posy)
 
     def screenSize():
         mainMonitor = CGDisplayBounds(CGMainDisplayID())
@@ -151,35 +179,48 @@ def processMessage(message, fn):
             devices[splitmsg[1]]["LMBHeld"] = False
             devices[splitmsg[1]]["RMBHeld"] = False
             fn("sendstart:"+splitmsg[1])
-        elif splitmsg[0] == "data" and len(splitmsg) == 5:
-            devices[splitmsg[1]]["x"] = devices[splitmsg[1]]["x"] + float(splitmsg[2])
-            newX = devices[splitmsg[1]]["x"]
-            devices[splitmsg[1]]["y"] = devices[splitmsg[1]]["y"] + float(splitmsg[3])
-            newY = devices[splitmsg[1]]["y"]
-            if (newX >= devices[splitmsg[1]]["xM"]) or newX <0:
-                fn("resetX:"+splitmsg[1])
-                newX = max(min(newX,devices[splitmsg[1]]["xM"]-1-1),0+1)
-            if (newY >= devices[splitmsg[1]]["yM"]) or newY <0:
-                fn("resetY:"+splitmsg[1])
-                newY = max(min(newY,devices[splitmsg[1]]["yM"]-1-1),0+1)
-            mousemove(newX,newY,devices[splitmsg[1]]["LMBHeld"],devices[splitmsg[1]])
-        elif splitmsg[0] == "reset" and len(splitmsg) == 2:
-            if devices[splitmsg[1]]:
-                devices[splitmsg[1]]["x"] = devices[splitmsg[1]]["xM"]/2
-                devices[splitmsg[1]]["y"] = devices[splitmsg[1]]["yM"]/2
-                newX = devices[splitmsg[1]]["x"]
-                newY = devices[splitmsg[1]]["y"]
-                mousemove(newX,newY,devices[splitmsg[1]]["LMBHeld"],devices[splitmsg[1]])
-        elif splitmsg[0] == "statusLMB" and len(splitmsg) == 3:
-            if devices[splitmsg[1]]:
-                wasHeld = devices[splitmsg[1]]["LMBHeld"]
+        elif devices[splitmsg[1]]:
+            mouse = devices[splitmsg[1]]
+
+            if splitmsg[0] == "data" and len(splitmsg) == 5:
+                mouse["x"] = mouse["x"] + float(splitmsg[2])
+                newX = mouse["x"]
+                mouse["y"] = mouse["y"] + float(splitmsg[3])
+                newY = mouse["y"]
+                if (newX >= mouse["xM"]) or newX <0:
+                    fn("resetX:"+splitmsg[1])
+                    newX = max(min(newX,mouse["xM"]-1-1),0+1)
+                if (newY >= mouse["yM"]) or newY <0:
+                    fn("resetY:"+splitmsg[1])
+                    newY = max(min(newY,mouse["yM"]-1-1),0+1)
+                mousemove(newX,newY,mouse["LMBHeld"],mouse["RMBHeld"],mouse)
+            elif splitmsg[0] == "reset" and len(splitmsg) == 2:
+                mouse["x"] = mouse["xM"]/2
+                mouse["y"] = mouse["yM"]/2
+                newX = mouse["x"]
+                newY = mouse["y"]
+                mousemove(newX,newY,mouse["LMBHeld"],mouse["RMBHeld"],mouse)
+            elif splitmsg[0] == "statusLMB" and len(splitmsg) == 3:
+                wasHeld = mouse["LMBHeld"]
                 isHeld = splitmsg[2] == "1"
                 if (wasHeld != isHeld):
-                    devices[splitmsg[1]]["LMBHeld"] = isHeld
+                    mouse["LMBHeld"] = isHeld
                     if isHeld:
-                        mousedown(devices[splitmsg[1]]["x"],devices[splitmsg[1]]["y"],devices[splitmsg[1]])
+                        mousedown(mouse["x"],mouse["y"],mouse,True)
                     else:
-                        mouseup(devices[splitmsg[1]]["x"],devices[splitmsg[1]]["y"],devices[splitmsg[1]])
+                        mouseup(mouse["x"],mouse["y"],mouse,True)
+            elif splitmsg[0] == "statusRMB" and len(splitmsg) == 3:
+                wasHeld = mouse["RMBHeld"]
+                isHeld = splitmsg[2] == "1"
+                if (wasHeld != isHeld):
+                    mouse["RMBHeld"] = isHeld
+                    if isHeld:
+                        mousedown(mouse["x"],mouse["y"],mouse,False)
+                    else:
+                        mouseup(mouse["x"],mouse["y"],mouse,False)
+            elif splitmsg[0] == "LMBDoubleClick" and len(splitmsg) == 2:
+                mouseclick(mouse["x"],mouse["y"],mouse,2)
+
 
 def wrapfn(sendfn):
     def displaysent(message):
@@ -212,7 +253,7 @@ def main():
                 print "A client ("+str(hex(id(client_socket)))+") connected, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST)
 
             else:
-                try:
+                #try:
                     data = socket.recv(RECV_BUFFER)
                     if data:
                         print "Data received from "+str(hex(id(socket)))+":",data
@@ -221,11 +262,11 @@ def main():
                         socket.close()
                         CONNECTION_LIST.remove(socket)
                         print "Client",hex(id(socket)),"removed, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST)
-                except:
-                    socket.close()
-                    CONNECTION_LIST.remove(socket)
-                    print "Client",hex(id(socket)),"removed!, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST)
-                    continue
+                #except:
+                    #socket.close()
+                    #CONNECTION_LIST.remove(socket)
+                    #print "Client",hex(id(socket)),"removed!, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST)
+                    #continue
 
     server_socket.close()
 

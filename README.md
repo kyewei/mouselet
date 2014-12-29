@@ -3,22 +3,25 @@ mouselet
 
 "mouselet" is an iOS Client App and TCP Server combination that allows an iPod touch/iPhone to control a computer's cursor like a mouse.
 To control the computer, start the server, connect to the server's IP through the iOS app, and then rotate the iDevice.
-The on-device gyroscope tracks and controls the mouse cursor.
+The on-device gyroscope tracks and controls the mouse cursor. 
+"mouselet" works best in networks with low latency.
 
 ###How to Run
+The iOS app was built with the iOS 8.1 SDK in Xcode 6, but with deployment target of iOS7.0, so any iOS version above 7.0 should work.
+
+For the server, a working installation of python 2.x is required. 
 To run the server, run either ``` python server.py ``` or ``` chmod +x server.py && ./server.py ``` depending on platform.
 
-A working installation of python 2.x is required. 
-The server can run on: 
+The server has been tested on: 
 * Mac OS X (tested: 10.9.5 Mavericks)
 * Windows (tested: 7 & 8) 
-* Most Linux distros (tested: Arch Linux)
+* Linux (tested: Arch Linux)
 
 The socket TCP server runs on port ```22096```.
 
-On Linux variants, the respective Python 2 X Library (``` python2-xlib ```  for Arch in the AUR) is needed also.
+On Linux variants, the respective Python 2 X Library (such as ``` python2-xlib ```  for Arch in the AUR) is needed also.
 Although the iOS app will probably not be in the App Store ($100 fee for iOS Developer Program), the Xcode source is hosted here, and can be compiled. 
-I might also upload an .ipa for jailbroken devices.
+I have also included an .ipa for jailbroken devices for those with AppSync. Use something like iFunBox to install.
 
 
 ###Operation and Mouse Control 

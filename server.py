@@ -150,23 +150,30 @@ elif currentPlatform == "linux2":
     def screenSize():
         return (display.screen().width_in_pixels,display.screen().height_in_pixels)
 
-    def mousemove(posx,posy,isHeld,device):
+    def mousemove(posx,posy,isHeldL,isHeldR,device):
         fake_input(display, X.MotionNotify, x=posx, y=posy)
         display.sync()
 
-    def mousedown(posx,posy,device):
-        mousemove(posx,posy,False,device)
-        fake_input(display, X.ButtonPress, 1)
+    def mousedown(posx,posy,device,isLeft):
+        mousemove(posx,posy,False,False,device)
+        if isLeft:
+            fake_input(display, X.ButtonPress, 1)
+        else:
+            fake_input(display, X.ButtonPress, 3)
         display.sync()
 
-    def mouseup(posx,posy,device):
-        mousemove(posx,posy,False,device)
-        fake_input(display, X.ButtonRelease, 1)
+    def mouseup(posx,posy,device,isLeft):
+        mousemove(posx,posy,False,False,device)
+        if isLeft:
+            fake_input(display, X.ButtonRelease, 1)
+        else:
+            fake_input(display, X.ButtonRelease, 3)
         display.sync()
 
     def mouseclick(posx,posy,device,count):
-        mousedown(posx,posy,device)
-        mouseup(posx,posy,device)
+        for i in range(count):
+            mousedown(posx,posy,device,True)
+            mouseup(posx,posy,device,True)
 
 #Connected Devices
 devices = {};

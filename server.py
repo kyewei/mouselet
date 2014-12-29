@@ -92,8 +92,8 @@ elif currentPlatform == "win32":
     MOUSEEVENTF_MOVE = 0x0001
     MOUSEEVENTF_LEFTDOWN = 0x0002
     MOUSEEVENTF_LEFTUP = 0x0004
-    #MOUSEEVENTF_RIGHTDOWN = 0x0008
-    #MOUSEEVENTF_RIGHTUP = 0x0010
+    MOUSEEVENTF_RIGHTDOWN = 0x0008
+    MOUSEEVENTF_RIGHTUP = 0x0010
     #MOUSEEVENTF_MIDDLEDOWN = 0x0020
     #MOUSEEVENTF_MIDDLEUP = 0x0040
     #MOUSEEVENTF_WHEEL = 0x0800
@@ -111,7 +111,7 @@ elif currentPlatform == "win32":
     def screenSize():
         return (ctypes.windll.user32.GetSystemMetrics(0),ctypes.windll.user32.GetSystemMetrics(1))
 
-    def mousemove(posx,posy,isHeld,device):
+    def mousemove(posx,posy,isHeldL,isHeldR,device):
         #dragging is just mousedown+ move mouse + mouseup, no nothing special
         #however, there is a quirk with dragging so that down-move-up must not be instantaneous
         #  or there wont be drag... thankfully since the device updates every x seconds, this
@@ -120,16 +120,24 @@ elif currentPlatform == "win32":
         #SetCursorPos(posx,posy)
 
     def mouseclick(posx,posy,device,count):
-        mousedown(posx,posy,device)
-        mouseup(posx,posy,device)
+        for i in range(count):
+            mousedown(posx,posy,device,True)
+            mouseup(posx,posy,device,True)
 
-    def mousedown(posx,posy,device):
-        mousemove(posx,posy,False,device)
-        mouse_event(MOUSEEVENTF_LEFTDOWN,0,0,0,0)
-
-    def mouseup(posx,posy,device):
-        mousemove(posx,posy,True,device)
-        mouse_event(MOUSEEVENTF_LEFTUP,0,0,0,0)
+    def mousedown(posx,posy,device,isLeft):
+        if isLeft:
+            mousemove(posx,posy,False,device["RMBHeld"],device)
+            mouse_event(MOUSEEVENTF_LEFTDOWN,0,0,0,0)
+        else:
+            mousemove(posx,posy,device["LMBHeld"],False,device)
+            mouse_event(MOUSEEVENTF_RIGHTDOWN,0,0,0,0)
+    def mouseup(posx,posy,device,isLeft):
+        if isLeft:
+            mousemove(posx,posy,True,device["RMBHeld"],device)
+            mouse_event(MOUSEEVENTF_LEFTUP,0,0,0,0)
+        else:
+            mousemove(posx,posy,device["LMBHeld"],True,device)
+            mouse_event(MOUSEEVENTF_RIGHTUP,0,0,0,0)
 
 #Linux only: use Xlibs
 elif currentPlatform == "linux2":
@@ -168,7 +176,8 @@ def processMessage(message, fn):
     # if theres a delay, messages are sent in bursts, so separate out each line
     splitmsgarr =message.strip().split("\n")
     for line in splitmsgarr: #then do processing on each line, which is a command
-        splitmsg = line.strip().split(":");
+        splitmsg = line.strip().split(":")
+        
         if splitmsg[0] == "verify" and len(splitmsg) == 2:
             screenS = screenSize()
             devices[splitmsg[1]] = {}
@@ -179,7 +188,7 @@ def processMessage(message, fn):
             devices[splitmsg[1]]["LMBHeld"] = False
             devices[splitmsg[1]]["RMBHeld"] = False
             fn("sendstart:"+splitmsg[1])
-        elif devices[splitmsg[1]]:
+        elif splitmsg[1] and devices[splitmsg[1]]:
             mouse = devices[splitmsg[1]]
 
             if splitmsg[0] == "data" and len(splitmsg) == 5:

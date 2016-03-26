@@ -109,10 +109,10 @@ elif currentPlatform == "win32":
     mouse_event = ctypes.windll.user32.mouse_event
     #SetCursorPos = ctypes.windll.user32.SetCursorPos
     def getX(posx,maxx): #Needed to convert to appropriate numbers for who knows why
-        return 65536L * long(posx) / maxx + 1
+        return ctypes.c_long(int(65536 * posx / maxx + 1))
 
     def getY(posy,maxy): #Needed to convert to appropriate numbers for who knows why
-        return 65536L * long(posy) / maxy + 1
+        return ctypes.c_long(int(65536 * posy / maxy + 1))
 
     def screenSize():
         return (ctypes.windll.user32.GetSystemMetrics(0),ctypes.windll.user32.GetSystemMetrics(1))
@@ -255,8 +255,8 @@ def processMessage(message, fn): #Functions returns None if no problems, or inco
 
 def wrapfn(sendfn): #Wrap and curry so every message is logged
     def displaysent(message):
-        print "Server sent messsage:",message
-        sendfn(message+"\n")
+        print ("Server sent messsage:",message)
+        sendfn((message+"\n").encode('utf-8'))
     return displaysent
 
 def main():
@@ -271,8 +271,8 @@ def main():
     server_socket.bind((HOST, PORT))
     server_socket.listen(5)
     CONNECTION_LIST.append(server_socket)
-    print "mouselet communication server ("+str(hex(id(server_socket)))+") started on port:", PORT
-    print "Total",len(CONNECTION_LIST),"connections(s)", map(lambda x:hex(id(x)),CONNECTION_LIST)
+    print ("mouselet communication server ("+str(hex(id(server_socket)))+") started on port:", PORT)
+    print ("Total",len(CONNECTION_LIST),"connections(s)", map(lambda x:hex(id(x)),CONNECTION_LIST))
     
     #Associative array to lookup incomplete lines
     #Sometimes when a connection is really bad, lines are broken up mid-transfer
@@ -287,17 +287,19 @@ def main():
             if socket == server_socket:
                 client_socket, address = server_socket.accept()
                 CONNECTION_LIST.append(client_socket)
-                print "A client ("+str(hex(id(client_socket)))+") connected, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST)
+                print ("A client ("+str(hex(id(client_socket)))+") connected, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST))
                 incompleteMessage[str(hex(id(client_socket)))] = ""
 
             else:
                 #try:
                     data = socket.recv(RECV_BUFFER)
                     if data:
-                        print "Data received from "+str(hex(id(socket)))+":",data
+                        print ("Data received from "+str(hex(id(socket)))+":",data)
                         
                         #Append previously incomplete last line
-                        appendedData = incompleteMessage[str(hex(id(socket)))] + data 
+                        #print(type(data).__name__)
+                        #//print(type(incompleteMessage[str(hex(id(socket)))]).__name__)
+                        appendedData = incompleteMessage[str(hex(id(socket)))] + data.decode('utf-8') 
                         incompleteMessage[str(hex(id(socket)))] = ""
                         
                         #Process message
@@ -307,11 +309,11 @@ def main():
                     else:
                         socket.close()
                         CONNECTION_LIST.remove(socket)
-                        print "Client",hex(id(socket)),"removed, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST)
+                        print ("Client",hex(id(socket)),"removed, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST))
                 #except:
                     #socket.close()
                     #CONNECTION_LIST.remove(socket)
-                    #print "Client",hex(id(socket)),"removed!, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST)
+                    #print ("Client",hex(id(socket)),"removed!, total",len(CONNECTION_LIST),"connections(s):", map(lambda x:hex(id(x)),CONNECTION_LIST))
                     #continue
 
     server_socket.close()

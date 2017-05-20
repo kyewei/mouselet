@@ -6,7 +6,7 @@ To control the computer, start the server, connect to the server's IP through th
 The on-device gyroscope tracks and controls the mouse cursor. 
 "mouselet" works best in networks with low latency.
 
-###How to Run
+### How to Run
 The iOS app was built with the iOS 8.1 SDK in Xcode 6, but with deployment target of iOS7.0, so any iOS version above 7.0 should work.
 
 For the server, a working installation of python 2.x is required. 
@@ -24,7 +24,7 @@ Although the iOS app will probably not be in the App Store ($100 fee for iOS Dev
 I have also included an .ipa for jailbroken devices for those with AppSync. Use something like iFunBox to install.
 
 
-###Operation and Mouse Control 
+### Operation and Mouse Control 
 There are two numeric settings, one for the multiplier, which is how much a unit turn is multiplied into screen pixel distance.
 The second is the grip/friction, which is how quick the mouse velocity decreases over time. 
 These can be adjusted with the 2 sliders.
